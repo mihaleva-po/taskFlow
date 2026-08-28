@@ -1,0 +1,9 @@
+package store
+
+type Task struct {
+	ID     string `json:"id"`
+	Title  string `json:"title"`
+	Status string `json:"status"`
+}
+
+var Tasks []Task
