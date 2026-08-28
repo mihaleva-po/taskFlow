@@ -31,7 +31,6 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 
 	if hasTask {
 		w.WriteHeader(http.StatusNoContent)
-		json.NewEncoder(w).Encode(common.Response{Message: "Задача удалена!"})
 		return
 	}
 

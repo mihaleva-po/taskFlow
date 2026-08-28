@@ -13,18 +13,10 @@ func Task(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
 
-	if id == "" {
-		response := common.Response{Message: "Некорректный ID!"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-
-	}
-
 	for _, v := range store.Tasks {
 		if v.ID == id {
-			json.NewEncoder(w).Encode(v)
 			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(v)
 			return
 		}
 	}

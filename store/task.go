@@ -6,4 +6,4 @@ type Task struct {
 	Status string `json:"status"`
 }
 
-var Tasks []Task
+var Tasks = []Task{}
