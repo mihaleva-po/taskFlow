@@ -17,6 +17,8 @@ func main() {
 	mux.HandleFunc("PUT /tasks/{id}", handlers.EditTask)
 	mux.HandleFunc("DELETE /tasks/{id}", handlers.DeleteTask)
 
-	http.ListenAndServe("localhost:8080", mux)
+	if err := http.ListenAndServe("localhost:8080", mux); err != nil {
+		panic(err)
+	}
 
 }

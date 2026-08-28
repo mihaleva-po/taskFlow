@@ -18,12 +18,6 @@ func EditTask(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
 
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(common.Response{Message: "Не корректный идентификатор задачи!"})
-		return
-	}
-
 	var task EditTaskRequest
 
 	err := json.NewDecoder(r.Body).Decode(&task)
