@@ -4,6 +4,8 @@ import (
 	"TaskFlow/common"
 	"TaskFlow/store"
 	"encoding/json"
+
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -14,7 +16,7 @@ type CreateTaskRequest struct {
 	Status string `json:"status"`
 }
 
-func CreateTask(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -46,9 +48,16 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 		Title:  request.Title,
 		Status: request.Status,
 	}
-	store.Tasks = append(store.Tasks, task)
-	w.WriteHeader(http.StatusCreated)
 
+	err = h.store.CreateTask(r.Context(), task)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("create task: %v", err)
+		json.NewEncoder(w).Encode(common.Response{Message: "Не удалось создать задачу!"})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(common.Response{Message: "Задача успешно создана!"})
 
 }
