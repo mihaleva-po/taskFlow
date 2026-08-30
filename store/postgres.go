@@ -11,9 +11,9 @@ type Store struct {
 }
 
 func NewStore(pool *pgxpool.Pool) *Store {
-return &Store{
-	pool: pool,
-}
+	return &Store{
+		pool: pool,
+	}
 }
 
 func NewPostgresPool(ctx context.Context, databaseUrl string) (*pgxpool.Pool, error) {

@@ -35,9 +35,9 @@ func main() {
 
 	mux.HandleFunc("POST /tasks", handler.CreateTask)
 	mux.HandleFunc("GET /tasks", handler.Tasks)
-	// mux.HandleFunc("GET /tasks/{id}", handlers.Task)
-	// mux.HandleFunc("PUT /tasks/{id}", handlers.EditTask)
-	// mux.HandleFunc("DELETE /tasks/{id}", handlers.DeleteTask)
+	mux.HandleFunc("GET /tasks/{id}", handler.Task)
+	mux.HandleFunc("PUT /tasks/{id}", handler.UpdateTask)
+	mux.HandleFunc("DELETE /tasks/{id}", handler.DeleteTask)
 
 	if err := http.ListenAndServe("localhost:8080", mux); err != nil {
 		panic(err)

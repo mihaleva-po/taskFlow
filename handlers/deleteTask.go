@@ -2,39 +2,33 @@ package handlers
 
 import (
 	"TaskFlow/common"
-	"TaskFlow/store"
 	"encoding/json"
+	"errors"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
 )
 
-func DeleteTask(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
 	id := r.PathValue("id")
 
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(common.Response{Message: "Некорректный идентификатор задачи!"})
-		return
-	}
+	err := h.store.DeleteTask(r.Context(), id)
 
-	hasTask := false
+	if err != nil {
 
-	for i, v := range store.Tasks {
-		if v.ID == id {
-			hasTask = true
-			store.Tasks = append(store.Tasks[:i], store.Tasks[i+1:]...)
-			break
+		if errors.Is(err, pgx.ErrNoRows) {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(common.Response{Message: "Такой задачи не существует!"})
+			return
 		}
-	}
 
-	if hasTask {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(common.Response{Message: "Ошибка удаления!"})
 		return
 	}
 
-	w.WriteHeader(http.StatusNotFound)
-	json.NewEncoder(w).Encode(common.Response{Message: "Такой задачи не существует!"})
-
+	w.WriteHeader(http.StatusNoContent)
 }
