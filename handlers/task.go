@@ -2,26 +2,36 @@ package handlers
 
 import (
 	"TaskFlow/common"
-	"TaskFlow/store"
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
 )
 
-func Task(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Task(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
 	id := r.PathValue("id")
 
-	for _, v := range store.Tasks {
-		if v.ID == id {
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(v)
-			return
+	task, err := h.store.GetTask(r.Context(), id)
+
+	if err != nil {
+
+		if errors.Is(err, pgx.ErrNoRows) {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(common.Response{Message: "Задача не найдена!"})
+			return 
 		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("get task: %v", err)
+		json.NewEncoder(w).Encode(common.Response{Message: "Произошла ошибка!"})
+		return
 	}
 
-	w.WriteHeader(http.StatusNotFound)
-	json.NewEncoder(w).Encode(common.Response{Message: "Задача не найдена!"})
-
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(task)
 }

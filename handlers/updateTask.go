@@ -4,21 +4,25 @@ import (
 	"TaskFlow/common"
 	"TaskFlow/store"
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
 )
 
-type EditTaskRequest struct {
+type UpdateTaskRequest struct {
 	Title  string `json:"title"`
 	Status string `json:"status"`
 }
 
-func EditTask(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
 	id := r.PathValue("id")
 
-	var task EditTaskRequest
+	var task UpdateTaskRequest
 
 	err := json.NewDecoder(r.Body).Decode(&task)
 
@@ -40,18 +44,19 @@ func EditTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	found := false
-	for i, v := range store.Tasks {
-		if v.ID == id {
-			store.Tasks[i] = store.Task{ID: id, Title: task.Title, Status: task.Status}
-			found = true
-			break
-		}
-	}
+	err = h.store.UpdateTask(r.Context(), store.Task{ID: id, Title: task.Title, Status: task.Status})
 
-	if !found {
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(common.Response{Message: "Такой задачи не существует!"})
+	if err != nil {
+
+		if errors.Is(err, pgx.ErrNoRows) {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(common.Response{Message: "Такой задачи не существует!"})
+			return 
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("update task: %v", err)
+		json.NewEncoder(w).Encode(common.Response{Message: "Не удалось изменить задачу!"})
 		return
 	}
 
