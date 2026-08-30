@@ -3,8 +3,11 @@ package handlers
 import (
 	"TaskFlow/common"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func (h *Handler) Task(w http.ResponseWriter, r *http.Request) {
@@ -16,6 +19,13 @@ func (h *Handler) Task(w http.ResponseWriter, r *http.Request) {
 	task, err := h.store.GetTask(r.Context(), id)
 
 	if err != nil {
+
+		if errors.Is(err, pgx.ErrNoRows) {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(common.Response{Message: "Задача не найдена!"})
+			return 
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("get task: %v", err)
 		json.NewEncoder(w).Encode(common.Response{Message: "Произошла ошибка!"})

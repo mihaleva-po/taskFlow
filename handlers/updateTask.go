@@ -51,6 +51,7 @@ func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(common.Response{Message: "Такой задачи не существует!"})
+			return 
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)

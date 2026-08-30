@@ -20,6 +20,7 @@ func NewPostgresPool(ctx context.Context, databaseUrl string) (*pgxpool.Pool, er
 	pool, err := pgxpool.New(ctx, databaseUrl)
 
 	if err != nil {
+		pool.Close()
 		return nil, err
 	}
 

@@ -20,7 +20,6 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	var task store.Task
 	var request CreateTaskRequest
 
 	err := json.NewDecoder(r.Body).Decode(&request)
@@ -43,7 +42,7 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task = store.Task{
+	task := store.Task{
 		ID:     uuid.New().String(),
 		Title:  request.Title,
 		Status: request.Status,

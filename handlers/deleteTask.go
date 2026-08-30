@@ -11,8 +11,6 @@ import (
 
 func (h *Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "application/json")
-
 	id := r.PathValue("id")
 
 	err := h.store.DeleteTask(r.Context(), id)
@@ -20,11 +18,13 @@ func (h *Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 
 		if errors.Is(err, pgx.ErrNoRows) {
+			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(common.Response{Message: "Такой задачи не существует!"})
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(common.Response{Message: "Ошибка удаления!"})
 		return
