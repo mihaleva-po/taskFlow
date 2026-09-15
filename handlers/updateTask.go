@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -21,6 +22,12 @@ func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	id := r.PathValue("id")
+
+	if _, err := uuid.Parse(id); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(common.Response{Message: "Некорректный UUID!"})
+		return 
+	}
 
 	var task UpdateTaskRequest
 
@@ -51,7 +58,7 @@ func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(common.Response{Message: "Такой задачи не существует!"})
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)
