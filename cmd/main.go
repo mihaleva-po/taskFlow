@@ -2,6 +2,7 @@ package main
 
 import (
 	"TaskFlow/handlers"
+	"TaskFlow/middleware"
 	"TaskFlow/store"
 	"context"
 	"log"
@@ -42,8 +43,9 @@ func main() {
 	mux.HandleFunc("PUT /tasks/{id}", handler.UpdateTask)
 	mux.HandleFunc("DELETE /tasks/{id}", handler.DeleteTask)
 
-	if err := http.ListenAndServe("localhost:8080", mux); err != nil {
+	httpHandler := middleware.Logging(mux)
+
+	if err := http.ListenAndServe("localhost:8080", httpHandler); err != nil {
 		panic(err)
 	}
-
 }
