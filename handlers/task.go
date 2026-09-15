@@ -20,7 +20,7 @@ func (h *Handler) Task(w http.ResponseWriter, r *http.Request) {
 	if _, err := uuid.Parse(id); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(common.Response{Message: "Некорректный UUID!"})
-		return 
+		return
 	}
 
 	task, err := h.store.GetTask(r.Context(), id)
@@ -30,7 +30,7 @@ func (h *Handler) Task(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(common.Response{Message: "Задача не найдена!"})
-			return 
+			return
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)
