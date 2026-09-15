@@ -4,15 +4,21 @@ import (
 	"TaskFlow/handlers"
 	"TaskFlow/store"
 	"context"
+	"log"
 	"net/http"
 	"os"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 
-	// БД
-	ctx := context.Background() // создаем пустой корневой контекст
+	if err := godotenv.Load(); err != nil {
+		log.Println("Файл .env не найден, используются переменные окружения")
+	}
+
 	databaseURL := os.Getenv("DATABASE_URL")
+
+	ctx := context.Background() // создаем пустой корневой контекст
 
 	pool, err := store.NewPostgresPool(ctx, databaseURL)
 
