@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -15,6 +16,12 @@ func (h *Handler) Task(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	id := r.PathValue("id")
+
+	if _, err := uuid.Parse(id); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(common.Response{Message: "Некорректный UUID!"})
+		return 
+	}
 
 	task, err := h.store.GetTask(r.Context(), id)
 

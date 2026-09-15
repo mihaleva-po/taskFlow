@@ -4,7 +4,6 @@ import (
 	"TaskFlow/handlers"
 	"TaskFlow/store"
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 )
@@ -22,8 +21,6 @@ func main() {
 	}
 
 	defer pool.Close()
-
-	fmt.Println("Подсоединились к бд!")
 
 	tasksStore := store.NewStore(pool)
 	handler := handlers.NewHandler(tasksStore)
