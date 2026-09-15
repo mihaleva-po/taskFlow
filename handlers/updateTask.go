@@ -21,6 +21,9 @@ func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
 	id := r.PathValue("id")
 
 	if _, err := uuid.Parse(id); err != nil {
@@ -31,9 +34,7 @@ func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	var task UpdateTaskRequest
 
-	err := json.NewDecoder(r.Body).Decode(&task)
-
-	if err != nil {
+	if err := decoder.Decode(&task); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(common.Response{Message: "Некорректные данные!"})
 		return
@@ -51,7 +52,13 @@ func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.store.UpdateTask(r.Context(), store.Task{ID: id, Title: task.Title, Status: task.Status})
+	if !common.IsValidStatus(task.Status) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(common.Response{Message: "Недопустимый статус!"})
+		return
+	}
+
+	err := h.store.UpdateTask(r.Context(), store.Task{ID: id, Title: task.Title, Status: task.Status})
 
 	if err != nil {
 

@@ -22,9 +22,10 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	var request CreateTaskRequest
 
-	err := json.NewDecoder(r.Body).Decode(&request)
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 
-	if err != nil {
+	if err := decoder.Decode(&request); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(common.Response{Message: "Некорректные данные!"})
 		return
@@ -42,13 +43,19 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !common.IsValidStatus(request.Status) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(common.Response{Message: "Недопустимый статус!"})
+		return
+	}
+
 	task := store.Task{
 		ID:     uuid.New().String(),
 		Title:  request.Title,
 		Status: request.Status,
 	}
 
-	err = h.store.CreateTask(r.Context(), task)
+	err := h.store.CreateTask(r.Context(), task)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("create task: %v", err)
